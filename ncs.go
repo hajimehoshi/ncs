@@ -16,7 +16,7 @@
 package ncs
 
 import (
-	"errors"
+	"fmt"
 	"regexp"
 	"strconv"
 )
@@ -53,7 +53,7 @@ var (
 func Parse(str string) (*Color, error) {
 	m := re.FindStringSubmatch(str)
 	if m == nil {
-		return nil, errors.New("ncs: invalid format")
+		return nil, fmt.Errorf("ncs: invalid format: %s", str)
 	}
 	b, err := strconv.Atoi(m[1])
 	if err != nil {
