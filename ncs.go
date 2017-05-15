@@ -101,7 +101,7 @@ func Parse(str string) (*Color, error) {
 // RGBA implements Color's RGBA.
 func (c *Color) RGBA() (r, g, b, a uint32) {
 	if c.monochrome {
-		a := uint32(100 - c.blackness) * 0xffff / 100
+		a := uint32(100-c.blackness) * 0xffff / 100
 		return a, a, a, 0xffff
 	}
 	var c0 *rgb
@@ -131,16 +131,28 @@ func (c *Color) RGBA() (r, g, b, a uint32) {
 		b: (c0.b*(100-v) + c1.b*v) / 100,
 	}
 	ch := uint16(c.chromaticness)
-	c3 := &rgb{
+	cw := &rgb{
 		r: (0xff*(100-ch) + c2.r*ch) / 100,
 		g: (0xff*(100-ch) + c2.g*ch) / 100,
 		b: (0xff*(100-ch) + c2.b*ch) / 100,
 	}
+	cb := &rgb{
+		r: c2.r * ch / 100,
+		g: c2.g * ch / 100,
+		b: c2.b * ch / 100,
+	}
 	bl := uint16(c.blackness)
+	blmax := 100 - ch
+	if blmax == 0 {
+		return uint32(cw.r) * 0x101, uint32(cw.g) * 0x101, uint32(cw.b) * 0x101, 0xffff
+	}
+	if bl > blmax {
+		return 0, 0, 0, 0xffff
+	}
 	c4 := &rgb{
-		r: c3.r * (100 - bl) / 100,
-		g: c3.g * (100 - bl) / 100,
-		b: c3.b * (100 - bl) / 100,
+		r: (cw.r*(blmax-bl) + cb.r*bl) / blmax,
+		g: (cw.g*(blmax-bl) + cb.g*bl) / blmax,
+		b: (cw.b*(blmax-bl) + cb.b*bl) / blmax,
 	}
 	return uint32(c4.r) * 0x101, uint32(c4.g) * 0x101, uint32(c4.b) * 0x101, 0xffff
 }
