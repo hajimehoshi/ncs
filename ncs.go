@@ -22,6 +22,7 @@ import (
 )
 
 type rgb struct {
+	// Each value is in 0x00-0xff, but the type is uint16 for overflow.
 	r uint16
 	g uint16
 	b uint16
@@ -99,7 +100,7 @@ func Parse(str string) (Color, error) {
 }
 
 // RGBA implements Color's RGBA.
-func (c *Color) RGBA() (r, g, b, a uint32) {
+func (c Color) RGBA() (r, g, b, a uint32) {
 	if c.monochrome {
 		a := uint32(100-c.Blackness) * 0xffff / 100
 		return a, a, a, 0xffff
