@@ -22,8 +22,9 @@ import (
 
 func TestParse(t *testing.T) {
 	cases := []struct {
-		In  string
-		Out Color
+		In   string
+		Out  Color
+		Out2 string
 	}{
 		{
 			In: "3000-Y10R",
@@ -32,6 +33,70 @@ func TestParse(t *testing.T) {
 				Chromaticness: 0,
 				Hue:           10,
 			},
+			Out2: "3000-Y10R",
+		},
+		{
+			In: "3030-Y10R",
+			Out: Color{
+				Blackness:     30,
+				Chromaticness: 30,
+				Hue:           10,
+			},
+			Out2: "3030-Y10R",
+		},
+		{
+			In: "3080-Y10R",
+			Out: Color{
+				Blackness:     30,
+				Chromaticness: 70,
+				Hue:           10,
+			},
+			Out2: "3070-Y10R",
+		},
+		{
+			In: "4020-B",
+			Out: Color{
+				Blackness:     40,
+				Chromaticness: 20,
+				Hue:           200,
+			},
+			Out2: "4020-B",
+		},
+		{
+			In: "3000-B50G",
+			Out: Color{
+				Blackness:     30,
+				Chromaticness: 0,
+				Hue:           250,
+			},
+			Out2: "3000-B50G",
+		},
+		{
+			In: "9910-B50G",
+			Out: Color{
+				Blackness:     99,
+				Chromaticness: 1,
+				Hue:           250,
+			},
+			Out2: "9901-B50G",
+		},
+		{
+			In: "3000-N",
+			Out: Color{
+				Blackness:     30,
+				Chromaticness: 0,
+				Hue:           -1,
+			},
+			Out2: "3000-N",
+		},
+		{
+			In: "3020-N",
+			Out: Color{
+				Blackness:     30,
+				Chromaticness: 0,
+				Hue:           -1,
+			},
+			Out2: "3000-N",
 		},
 	}
 
@@ -42,7 +107,13 @@ func TestParse(t *testing.T) {
 		}
 		want := c.Out
 		if got != want {
-			t.Errorf("Parse(%v): got: %v, want: %v", c.In, got, want)
+			t.Errorf("Parse(%q): got %v, want %v", c.In, got, want)
+		}
+
+		got2 := c.Out2
+		want2 := want.String()
+		if got2 != want2 {
+			t.Errorf("Parse(%q).String(): got %q, want %q", c.In, got2, want2)
 		}
 	}
 }
