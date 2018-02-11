@@ -40,7 +40,7 @@ var (
 type Color struct {
 	Blackness     int // 00 - 99
 	Chromaticness int // 00 - (100 - Blackness)
-	hue           int
+	Hue           int
 	monochrome    bool // true is the hue is N
 }
 
@@ -50,18 +50,18 @@ var (
 
 // Parse parses a given string and returns a Color object.
 // The conversion is approximate.
-func Parse(str string) (*Color, error) {
+func Parse(str string) (Color, error) {
 	m := re.FindStringSubmatch(str)
 	if m == nil {
-		return nil, fmt.Errorf("ncs: invalid format: %s", str)
+		return Color{}, fmt.Errorf("ncs: invalid format: %s", str)
 	}
 	b, err := strconv.Atoi(m[1])
 	if err != nil {
-		return nil, err
+		return Color{}, err
 	}
 	c, err := strconv.Atoi(m[2])
 	if err != nil {
-		return nil, err
+		return Color{}, err
 	}
 	h := 0
 	switch {
@@ -90,11 +90,11 @@ func Parse(str string) (*Color, error) {
 	if err != nil {
 		panic("not reached")
 	}
-	return &Color{
+	return Color{
 		Blackness:     b,
 		Chromaticness: c,
+		Hue:           h,
 		monochrome:    m[3] == "N",
-		hue:           h,
 	}, nil
 }
 
@@ -108,22 +108,22 @@ func (c *Color) RGBA() (r, g, b, a uint32) {
 	var c1 *rgb
 	v := uint16(0)
 	switch {
-	case 0 <= c.hue && c.hue < 100:
+	case 0 <= c.Hue && c.Hue < 100:
 		c0 = yellow
 		c1 = red
-		v = uint16(c.hue)
-	case 100 <= c.hue && c.hue < 200:
+		v = uint16(c.Hue)
+	case 100 <= c.Hue && c.Hue < 200:
 		c0 = red
 		c1 = blue
-		v = uint16(c.hue - 100)
-	case 200 <= c.hue && c.hue < 300:
+		v = uint16(c.Hue - 100)
+	case 200 <= c.Hue && c.Hue < 300:
 		c0 = blue
 		c1 = green
-		v = uint16(c.hue - 200)
-	case 300 <= c.hue && c.hue < 400:
+		v = uint16(c.Hue - 200)
+	case 300 <= c.Hue && c.Hue < 400:
 		c0 = green
 		c1 = yellow
-		v = uint16(c.hue - 300)
+		v = uint16(c.Hue - 300)
 	}
 	c2 := &rgb{
 		r: (c0.r*(100-v) + c1.r*v) / 100,
