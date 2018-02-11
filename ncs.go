@@ -36,8 +36,6 @@ var (
 	green  = &rgb{0x00, 0x9F, 0x6B}
 )
 
-const HueN = -1
-
 // Color represents a color in Natural Color System.
 // Color implements image/color's Color interface.
 //
@@ -46,15 +44,15 @@ type Color struct {
 	// 0 to 99
 	Blackness int
 
-	// 0 to min(100 - Blackness, 99) for non-N
-	// 0                             for N
+	// 0 to min(100 - Blackness, 99)
 	Chromaticness int
 
-	// -1         for N
-	// 0   to 99  for Y to R
-	// 100 to 199 for R to B
-	// 200 to 299 for B to G
-	// 300 to 399 for G to Y
+	// If Chromaticness is 0, Hue is 0.
+	// Otherwise:
+	//   0   to 99  for Y to R
+	//   100 to 199 for R to B
+	//   200 to 299 for B to G
+	//   300 to 399 for G to Y
 	Hue int
 }
 
@@ -80,7 +78,7 @@ func Parse(str string) (Color, error) {
 	h := 0
 	switch {
 	case m[3] == "N":
-		h = HueN
+		c = 0
 	case m[3] == "Y":
 		h = 0
 	case m[3] == "R":
@@ -106,11 +104,11 @@ func Parse(str string) (Color, error) {
 	if err != nil {
 		panic("not reached")
 	}
-	if c > 100 - b {
+	if c > 100-b {
 		c = 100 - b
 	}
-	if h == -1 {
-		c = 0
+	if c == 0 {
+		h = 0
 	}
 	return Color{
 		Blackness:     b,
@@ -123,7 +121,7 @@ func Parse(str string) (Color, error) {
 func (c Color) String() string {
 	hue := "?"
 	switch {
-	case c.Hue == -1:
+	case c.Chromaticness == 0:
 		hue = "N"
 	case c.Hue == 0:
 		hue = "Y"
@@ -136,18 +134,18 @@ func (c Color) String() string {
 	case 0 < c.Hue && c.Hue < 100:
 		hue = fmt.Sprintf("Y%02dR", c.Hue)
 	case 100 < c.Hue && c.Hue < 200:
-		hue = fmt.Sprintf("R%02dB", c.Hue - 100)
+		hue = fmt.Sprintf("R%02dB", c.Hue-100)
 	case 200 < c.Hue && c.Hue < 300:
-		hue = fmt.Sprintf("B%02dG", c.Hue - 200)
+		hue = fmt.Sprintf("B%02dG", c.Hue-200)
 	case 300 < c.Hue && c.Hue < 400:
-		hue = fmt.Sprintf("G%02dY", c.Hue - 300)
+		hue = fmt.Sprintf("G%02dY", c.Hue-300)
 	}
 	return fmt.Sprintf("%02d%02d-%s", c.Blackness, c.Chromaticness, hue)
 }
 
 // RGBA implements Color's RGBA.
 func (c Color) RGBA() (r, g, b, a uint32) {
-	if c.Hue == HueN {
+	if c.Chromaticness == 0 {
 		a := uint32(100-c.Blackness) * 0xffff / 100
 		return a, a, a, 0xffff
 	}

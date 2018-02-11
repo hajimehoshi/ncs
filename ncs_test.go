@@ -27,13 +27,13 @@ func TestParse(t *testing.T) {
 		Out2 string
 	}{
 		{
-			In: "3000-Y10R",
+			In: "3010-Y10R",
 			Out: Color{
 				Blackness:     30,
-				Chromaticness: 0,
+				Chromaticness: 10,
 				Hue:           10,
 			},
-			Out2: "3000-Y10R",
+			Out2: "3010-Y10R",
 		},
 		{
 			In: "3030-Y10R",
@@ -63,13 +63,13 @@ func TestParse(t *testing.T) {
 			Out2: "4020-B",
 		},
 		{
-			In: "3000-B50G",
+			In: "3020-B50G",
 			Out: Color{
 				Blackness:     30,
-				Chromaticness: 0,
+				Chromaticness: 20,
 				Hue:           250,
 			},
-			Out2: "3000-B50G",
+			Out2: "3020-B50G",
 		},
 		{
 			In: "9910-B50G",
@@ -85,7 +85,17 @@ func TestParse(t *testing.T) {
 			Out: Color{
 				Blackness:     30,
 				Chromaticness: 0,
-				Hue:           -1,
+				Hue:           0,
+			},
+			Out2: "3000-N",
+		},
+		{
+			// If Chromaticness is 0, Hue is ignored.
+			In: "3000-Y10R",
+			Out: Color{
+				Blackness:     30,
+				Chromaticness: 0,
+				Hue:           0,
 			},
 			Out2: "3000-N",
 		},
@@ -94,7 +104,7 @@ func TestParse(t *testing.T) {
 			Out: Color{
 				Blackness:     30,
 				Chromaticness: 0,
-				Hue:           -1,
+				Hue:           0,
 			},
 			Out2: "3000-N",
 		},
@@ -107,7 +117,7 @@ func TestParse(t *testing.T) {
 		}
 		want := c.Out
 		if got != want {
-			t.Errorf("Parse(%q): got %v, want %v", c.In, got, want)
+			t.Errorf("Parse(%q): got %#v, want %#v", c.In, got, want)
 		}
 
 		got2 := c.Out2
