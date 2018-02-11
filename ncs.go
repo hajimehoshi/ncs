@@ -38,10 +38,10 @@ var (
 // Color represents a color in Natural Color System.
 // Color implements image/color's Color interface.
 type Color struct {
-	blackness     int
-	chromaticness int
-	monochrome    bool
+	Blackness     int // 00 - 99
+	Chromaticness int // 00 - (100 - Blackness)
 	hue           int
+	monochrome    bool // true is the hue is N
 }
 
 var (
@@ -91,8 +91,8 @@ func Parse(str string) (*Color, error) {
 		panic("not reached")
 	}
 	return &Color{
-		blackness:     b,
-		chromaticness: c,
+		Blackness:     b,
+		Chromaticness: c,
 		monochrome:    m[3] == "N",
 		hue:           h,
 	}, nil
@@ -101,7 +101,7 @@ func Parse(str string) (*Color, error) {
 // RGBA implements Color's RGBA.
 func (c *Color) RGBA() (r, g, b, a uint32) {
 	if c.monochrome {
-		a := uint32(100-c.blackness) * 0xffff / 100
+		a := uint32(100-c.Blackness) * 0xffff / 100
 		return a, a, a, 0xffff
 	}
 	var c0 *rgb
@@ -130,7 +130,7 @@ func (c *Color) RGBA() (r, g, b, a uint32) {
 		g: (c0.g*(100-v) + c1.g*v) / 100,
 		b: (c0.b*(100-v) + c1.b*v) / 100,
 	}
-	ch := uint16(c.chromaticness)
+	ch := uint16(c.Chromaticness)
 	cw := &rgb{
 		r: (0xff*(100-ch) + c2.r*ch) / 100,
 		g: (0xff*(100-ch) + c2.g*ch) / 100,
@@ -141,7 +141,7 @@ func (c *Color) RGBA() (r, g, b, a uint32) {
 		g: c2.g * ch / 100,
 		b: c2.b * ch / 100,
 	}
-	bl := uint16(c.blackness)
+	bl := uint16(c.Blackness)
 	blmax := 100 - ch
 	if blmax == 0 {
 		return uint32(cw.r) * 0x101, uint32(cw.g) * 0x101, uint32(cw.b) * 0x101, 0xffff
