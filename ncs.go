@@ -117,6 +117,10 @@ func Parse(str string) (Color, error) {
 	}, nil
 }
 
+func digitsToString(x int) string {
+	return string((x/10)+'0') + string((x%10)+'0')
+}
+
 // String returns a string representing the color.
 func (c Color) String() string {
 	hue := "?"
@@ -132,15 +136,15 @@ func (c Color) String() string {
 	case c.Hue == 300:
 		hue = "G"
 	case 0 < c.Hue && c.Hue < 100:
-		hue = fmt.Sprintf("Y%02dR", c.Hue)
+		hue = "Y" + digitsToString(c.Hue) + "R"
 	case 100 < c.Hue && c.Hue < 200:
-		hue = fmt.Sprintf("R%02dB", c.Hue-100)
+		hue = "R" + digitsToString(c.Hue - 100) + "B"
 	case 200 < c.Hue && c.Hue < 300:
-		hue = fmt.Sprintf("B%02dG", c.Hue-200)
+		hue = "B" + digitsToString(c.Hue - 200) + "G"
 	case 300 < c.Hue && c.Hue < 400:
-		hue = fmt.Sprintf("G%02dY", c.Hue-300)
+		hue = "G" + digitsToString(c.Hue - 300) + "Y"
 	}
-	return fmt.Sprintf("%02d%02d-%s", c.Blackness, c.Chromaticness, hue)
+	return digitsToString(c.Blackness) + digitsToString(c.Chromaticness) + "-" + hue
 }
 
 // RGBA implements Color's RGBA.
